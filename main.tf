@@ -44,7 +44,7 @@ resource "google_compute_instance" "default" {
  machine_type = "f1-micro"
  zone         = "us-central1-c"
   metadata {
-     sshkeys = "ubuntu:${base64decode(google_service_account_key.mykey.private_key)}"
+     sshkeys = "ubuntu:${base64decode(google_service_account_key.mykey.public_key)}"
 //   sshKeys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
  }
  boot_disk {
@@ -53,7 +53,7 @@ resource "google_compute_instance" "default" {
    }
  }
 
- metadata_startup_script = "sudo apt-get update; sudo apt-get install -yq build-essential python-pip rsync; sudo pip install flask; cd /tmp; sudo chmod 755 /tmp/setUpDocker.sh; sudo /tmp/setUpDocker.sh; sudo python /tmp/myhello.py"
+ metadata_startup_script = "sudo apt-get update; sudo apt-get install -yq build-essential python-pip wget rsync; sudo pip install flask; sudo apt-get install apt-transport-https ca-certificates curl gnupg2 software-properties-common -y ; cd /home/ubuntu; wget https://s3-us-west-2.amazonaws.com/jdohoney-se-demo/setUpDocker.sh ; sudo chmod 755 /home/ubuntu/setUpDocker.sh; sudo /home/ubuntu/setUpDocker.sh; wget https://s3-us-west-2.amazonaws.com/jdohoney-se-demo/myhello.py; sudo python /home/ubuntu/myhello.py" 
 
  network_interface {
    network = "default"
@@ -73,7 +73,7 @@ resource "google_compute_instance" "default" {
     }
 
     source      = "${file("${path.module}/scripts/setUpDocker.sh")}"
-    destination = "/tmp"
+    destination = "/home/ubuntu"
     on_failure = "continue"
   }
 
@@ -88,7 +88,7 @@ resource "google_compute_instance" "default" {
     }
 
     source      = "${file("${path.module}/scripts/myhello.py")}"
-    destination = "/tmp"
+    destination = "/home/ubuntu"
     on_failure  = "continue"
   }
 
