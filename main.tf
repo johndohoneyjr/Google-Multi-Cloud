@@ -22,13 +22,6 @@ resource "google_service_account_key" "mykey" {
   public_key_type = "TYPE_X509_PEM_FILE"
 }
 
-//resource "google_project_iam_binding" "cloud-admin" {
-//    role    =  "roles/compute.admin"
-//     members = [
-//         "serviceAccount:${google_service_account.myaccount.email}"
-//     ]
-// }
-
 resource "google_compute_firewall" "default" {
  name    = "flask-rest-app-firewall"
  network = "default"
@@ -44,8 +37,9 @@ resource "google_compute_instance" "default" {
  machine_type = "f1-micro"
  zone         = "us-central1-c"
   metadata {
-     sshkeys = "ubuntu:${base64decode(google_service_account_key.mykey.public_key)}"
+//   sshkeys = "ubuntu:${base64decode(google_service_account_key.mykey.public_key)}"
 //   sshKeys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
+     sshKeys = "ubuntu:${var.mypublic-key}"
  }
  boot_disk {
    initialize_params {
@@ -68,8 +62,9 @@ resource "google_compute_instance" "default" {
       type    = "ssh"
       user    = "root"
       timeout = "20s"
-      private_key = "${base64decode(google_service_account_key.mykey.private_key)}"
+//      private_key = "${base64decode(google_service_account_key.mykey.private_key)}"
 //      private_key = "${file("~/.ssh/id_rsa")}"
+      private_key =  "${var.myprivate-key}"
     }
 
     source      = "${file("${path.module}/scripts/setUpDocker.sh")}"
@@ -83,8 +78,9 @@ resource "google_compute_instance" "default" {
       type    = "ssh"
       user    = "ubuntu"
       timeout = "20s"
-      private_key = "${base64decode(google_service_account_key.mykey.private_key)}"
+//      private_key = "${base64decode(google_service_account_key.mykey.private_key)}"
 //      private_key = "${file("~/.ssh/id_rsa")}"
+      private_key =  "${var.myprivate-key}"
     }
 
     source      = "${file("${path.module}/scripts/myhello.py")}"
