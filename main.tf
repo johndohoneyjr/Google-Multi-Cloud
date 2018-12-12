@@ -47,7 +47,9 @@ resource "google_compute_instance" "default" {
    }
  }
 
- metadata_startup_script = "sudo apt-get update; sudo apt-get install -yq build-essential python-pip wget rsync; sudo pip install flask; sudo apt-get install apt-transport-https ca-certificates curl gnupg2 software-properties-common -y ; cd /home/ubuntu; wget https://s3-us-west-2.amazonaws.com/jdohoney-se-demo/setUpDocker.sh ; sudo chmod 755 /home/ubuntu/setUpDocker.sh; sudo /home/ubuntu/setUpDocker.sh; wget https://s3-us-west-2.amazonaws.com/jdohoney-se-demo/myhello.py; sudo python /home/ubuntu/myhello.py" 
+// metadata_startup_script = "sudo apt-get update; sudo apt-get install -yq build-essential python-pip wget rsync; sudo pip install flask; sudo apt-get install apt-transport-https ca-certificates curl gnupg2 software-properties-common -y ; cd /home/ubuntu; wget https://s3-us-west-2.amazonaws.com/jdohoney-se-demo/setUpDocker.sh ; sudo chmod 755 /home/ubuntu/setUpDocker.sh; sudo /home/ubuntu/setUpDocker.sh; wget https://s3-us-west-2.amazonaws.com/jdohoney-se-demo/myhello.py; sudo python /home/ubuntu/myhello.py" 
+
+ metadata_startup_script = "sudo apt-get update; sudo apt-get install -yq build-essential python-pip wget rsync; sudo pip install flask; sudo apt-get install apt-transport-https ca-certificates curl gnupg2 software-properties-common -y ; cd /home/ubuntu; sudo chmod 755 /home/ubuntu/setUpDocker.sh; sudo /home/ubuntu/setUpDocker.sh; sudo python /home/ubuntu/myhello.py"
 
  network_interface {
    network = "default"
@@ -60,7 +62,7 @@ resource "google_compute_instance" "default" {
   provisioner "file" {
     connection {
       type    = "ssh"
-      user    = "root"
+      user    = "ubuntu"
       timeout = "20s"
 //      private_key = "${base64decode(google_service_account_key.mykey.private_key)}"
 //      private_key = "${file("~/.ssh/id_rsa")}"
@@ -69,7 +71,7 @@ resource "google_compute_instance" "default" {
 
     source      = "${file("${path.module}/scripts/setUpDocker.sh")}"
     destination = "/home/ubuntu"
-    on_failure = "continue"
+//    on_failure = "continue"
   }
 
 
@@ -85,7 +87,7 @@ resource "google_compute_instance" "default" {
 
     source      = "${file("${path.module}/scripts/myhello.py")}"
     destination = "/home/ubuntu"
-    on_failure  = "continue"
+//    on_failure  = "continue"
   }
 
   depends_on = ["google_compute_firewall.default","random_id.instance_id"]
