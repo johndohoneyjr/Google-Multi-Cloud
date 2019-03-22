@@ -1,6 +1,7 @@
 provider "google" {
- project     = "dohoney-gcp-demo"
- region      = "us-west1"
+ credentials = "${var.gcp_credentials}"
+ project     = "${var.gcp_project}"
+ region      = "${var.gcp_region}"
 }
 
 // Terraform plugin for creating random ids
