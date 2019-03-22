@@ -1,5 +1,5 @@
 provider "google" {
- project     = "john-dohoney-test-219619"
+ project     = "dohoney-gcp-demo"
  region      = "us-central1"
 }
 
@@ -13,8 +13,8 @@ resource "random_id" "instance_id" {
 // https://console.developers.google.com/apis/api/iam.googleapis.com
 //
 resource "google_service_account" "myaccount" {
-  account_id = "dohoney-gcp-demo"
-  display_name = "dohoney-gcp-demo"
+  account_id = "terraform"
+  display_name = "terraform Service account"
 }
 
 resource "google_service_account_key" "mykey" {
