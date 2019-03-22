@@ -1,25 +1,11 @@
 provider "google" {
  project     = "dohoney-gcp-demo"
- region      = "us-central1"
+ region      = "us-west1"
 }
 
 // Terraform plugin for creating random ids
 resource "random_id" "instance_id" {
  byte_length = 8
-}
-
-//
-// You will need to enable the IAM API to use this
-// https://console.developers.google.com/apis/api/iam.googleapis.com
-//
-resource "google_service_account" "myaccount" {
-  account_id = "terraform"
-  display_name = "terraform Service account"
-}
-
-resource "google_service_account_key" "mykey" {
-  service_account_id = "${google_service_account.myaccount.name}"
-  public_key_type = "TYPE_X509_PEM_FILE"
 }
 
 resource "google_compute_firewall" "default" {
@@ -33,11 +19,10 @@ resource "google_compute_firewall" "default" {
 }
 
 resource "google_compute_instance" "default" {
- name         = "flask-vm-${random_id.instance_id.hex}"
+ name         = "nodeapi-vm-${random_id.instance_id.hex}"
  machine_type = "f1-micro"
- zone         = "us-central1-c"
+ zone         = "us-west1-b"
   metadata {
-//   sshkeys = "ubuntu:${base64decode(google_service_account_key.mykey.public_key)}"
 //   sshKeys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
      sshKeys = "ubuntu:${var.mypublic-key}"
  }
@@ -47,9 +32,7 @@ resource "google_compute_instance" "default" {
    }
  }
 
-// metadata_startup_script = "sudo apt-get update; sudo apt-get install -yq build-essential python-pip wget rsync; sudo pip install flask; sudo apt-get install apt-transport-https ca-certificates curl gnupg2 software-properties-common -y ; cd /home/ubuntu; wget https://s3-us-west-2.amazonaws.com/jdohoney-se-demo/setUpDocker.sh ; sudo chmod 755 /home/ubuntu/setUpDocker.sh; sudo /home/ubuntu/setUpDocker.sh; wget https://s3-us-west-2.amazonaws.com/jdohoney-se-demo/myhello.py; sudo python /home/ubuntu/myhello.py" 
-
- metadata_startup_script = "sudo apt-get update; sudo apt-get install -yq build-essential python-pip wget rsync; sudo pip install flask; sudo apt-get install apt-transport-https ca-certificates curl gnupg2 software-properties-common -y ; cd /home/ubuntu; sudo chmod 755 /home/ubuntu/setUpDocker.sh; sudo /home/ubuntu/setUpDocker.sh; sudo python /home/ubuntu/myhello.py"
+ metadata_startup_script = "echo \"start-up complete\""
 
  network_interface {
    network = "default"
@@ -59,36 +42,40 @@ resource "google_compute_instance" "default" {
    }
  }
 
-  provisioner "file" {
+  provisioner "remote-exec" {
     connection {
       type    = "ssh"
       user    = "ubuntu"
       timeout = "20s"
-//      private_key = "${base64decode(google_service_account_key.mykey.private_key)}"
 //      private_key = "${file("~/.ssh/id_rsa")}"
       private_key =  "${var.myprivate-key}"
     }
 
-    source      = "${file("${path.module}/scripts/setUpDocker.sh")}"
-    destination = "/home/ubuntu"
+    inline = [
+      "sudo apt-get update",
+      "sudo apt install apt-transport-https ca-certificates curl software-properties-common -y",
+      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
+      "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable\"",
+      "sudo apt update",
+      "apt-cache policy docker-ce",
+      "sudo apt install docker-ce -y",
+      "sudo docker run -d -p 8080:8080 johndohoney/simplenodeapi"
+    ]
+  }
+
+//  provisioner "file" {
+//    connection {
+//      type    = "ssh"
+//      user    = "ubuntu"
+//      timeout = "20s"
+//      private_key = "${file("~/.ssh/id_rsa")}"
+//      private_key =  "${var.myprivate-key}"
+//    }
+//
+//    source      = "${file("${path.module}/scripts/setUpDocker.sh")}"
+//    destination = "/home/ubuntu/setUpDocker.sh"
 //    on_failure = "continue"
-  }
-
-
-  provisioner "file" {
-    connection {
-      type    = "ssh"
-      user    = "ubuntu"
-      timeout = "20s"
-//      private_key = "${base64decode(google_service_account_key.mykey.private_key)}"
-//      private_key = "${file("~/.ssh/id_rsa")}"
-      private_key =  "${var.myprivate-key}"
-    }
-
-    source      = "${file("${path.module}/scripts/myhello.py")}"
-    destination = "/home/ubuntu"
-//    on_failure  = "continue"
-  }
+//  }
 
   depends_on = ["google_compute_firewall.default","random_id.instance_id"]
 }
