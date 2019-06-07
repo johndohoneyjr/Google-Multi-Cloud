@@ -22,7 +22,7 @@ resource "google_compute_firewall" "default" {
 resource "google_compute_instance" "default" {
  name         = "nodeapi-vm-${random_id.instance_id.hex}"
  machine_type = "f1-micro"
- zone         = "us-west1-b"
+ location         = "us-west1-b"
   metadata {
 //   sshKeys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
      sshKeys = "ubuntu:${var.mypublic-key}"
