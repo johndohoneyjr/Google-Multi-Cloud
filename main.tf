@@ -22,7 +22,7 @@ resource "google_compute_firewall" "default" {
 resource "google_compute_instance" "default" {
  name         = "nodeapi-vm-${random_id.instance_id.hex}"
  machine_type = "f1-micro"
- location         = "us-west1-b"
+ zone         = "us-west1-b"
   metadata {
 //   sshKeys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
      sshKeys = "ubuntu:${var.mypublic-key}"
@@ -63,20 +63,5 @@ resource "google_compute_instance" "default" {
       "sudo docker run -d -p 8080:8080 johndohoney/simplenodeapi"
     ]
   }
-
-//  provisioner "file" {
-//    connection {
-//      type    = "ssh"
-//      user    = "ubuntu"
-//      timeout = "20s"
-//      private_key = "${file("~/.ssh/id_rsa")}"
-//      private_key =  "${var.myprivate-key}"
-//    }
-//
-//    source      = "${file("${path.module}/scripts/setUpDocker.sh")}"
-//    destination = "/home/ubuntu/setUpDocker.sh"
-//    on_failure = "continue"
-//  }
-
   depends_on = ["google_compute_firewall.default","random_id.instance_id"]
 }
