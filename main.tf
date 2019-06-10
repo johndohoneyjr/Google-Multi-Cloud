@@ -46,6 +46,7 @@ resource "google_compute_instance" "default" {
 
   provisioner "remote-exec" {
     connection {
+      host    = "${google_compute_instance.default.ip_address}"
       type    = "ssh"
       user    = "ubuntu"
       timeout = "20s"
