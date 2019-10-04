@@ -1,7 +1,7 @@
 provider "google" {
- //credentials = "${var.gcp_credentials}"
- //project     = "${var.gcp_project}"
- //region      = "${var.gcp_region}"
+ credentials = "${var.gcp_credentials}"
+ project     = "${var.gcp_project}"
+ region      = "${var.gcp_region}"
 }
 
 // Terraform plugin for creating random ids
