@@ -1,7 +1,7 @@
 provider "google" {
- credentials = "${var.gcp_credentials}"
- project     = "${var.gcp_project}"
- region      = "${var.gcp_region}"
+ //credentials = "${var.gcp_credentials}"
+ //project     = "${var.gcp_project}"
+ //region      = "${var.gcp_region}"
 }
 
 // Terraform plugin for creating random ids
@@ -24,8 +24,8 @@ resource "google_compute_instance" "default" {
  machine_type = "f1-micro"
  zone         = "us-west1-b"
  metadata = {
-//   sshKeys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
-     sshKeys = "ubuntu:${var.mypublic-key}"
+   sshKeys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
+   //sshKeys = "ubuntu:${var.mypublic-key}"
 }
 
  boot_disk {
@@ -50,8 +50,8 @@ resource "google_compute_instance" "default" {
       type    = "ssh"
       user    = "ubuntu"
       timeout = "20s"
-//      private_key = "${file("~/.ssh/id_rsa")}"
-      private_key =  "${var.myprivate-key}"
+      private_key = "${file("~/.ssh/id_rsa")}"
+//      private_key =  "${var.myprivate-key}"
     }
 
     inline = [
